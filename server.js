@@ -175,4 +175,4 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(PORT, '127.0.0.1', () => console.log(`Backend on http://localhost:${PORT} (AI: ${AI_URL})`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Backend on http://0.0.0.0:${PORT} (AI: ${AI_URL})`));
