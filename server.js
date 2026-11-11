@@ -23,6 +23,18 @@ await Promise.all(Object.values(DIRS).map((d) => fs.mkdir(d, { recursive: true }
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_MB * 1024 * 1024, files: 1 } });
 const app = express();
+const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').map((origin) => origin.trim()).filter(Boolean);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && (allowedOrigins.includes(origin) || allowedOrigins.includes('*'))) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigins.includes('*') ? '*' : origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  }
+  if (req.method === 'OPTIONS') return res.sendStatus(origin && !allowedOrigins.includes(origin) && !allowedOrigins.includes('*') ? 403 : 204);
+  next();
+});
 
 function workerRequest(pathname, options = {}) {
   if (!AI_URL || !WORKER_API_KEY) throw new Error('GPU worker is not configured. Set AI_URL and WORKER_API_KEY in Render.');
